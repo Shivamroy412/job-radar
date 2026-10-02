@@ -80,9 +80,37 @@ Edit the `cron` line in [`.github/workflows/schedule.yml`](../.github/workflows/
 postings don't change by the minute, so hourly is plenty.)
 
 ## Troubleshooting
-- **No Telegram message** — check the Actions run log. "no token"/"no chat id"
-  means a Secret is missing or misnamed. Make sure she messaged the bot once.
+- **No Telegram message** — check the Actions run log, **Run one pass** step.
+  - `Telegram send failed: HTTP Error 401` → the `TELEGRAM_BOT_TOKEN` secret is
+    wrong. Get the live token from BotFather (`/mybots` → your bot → API Token),
+    verify it at `https://api.telegram.org/bot<TOKEN>/getMe` (`"ok":true`), then
+    re-paste it into the secret with no spaces/quotes/newline. (401 = bad token,
+    not a bad chat id; and tokens don't expire — a dead one was revoked/mistyped.)
+  - `no token` / `no chat id` → a Secret is missing or misnamed.
+  - Runs fine but silent with `0 are new` → nothing new since the baseline (normal),
+    **or** you're looking at a stale state — see Recovery below.
+  - Make sure she messaged the bot once (bots can't start a chat).
 - **Cron never fires** — the repo must be public, workflows enabled on the
-  Actions tab, and (on a fork) not disabled by the 60-day rule.
+  Actions tab, and (on a fork) not disabled by the 60-day rule. Also, `0 * * * *`
+  (top of the hour) is the most contended slot and often delayed/dropped; a quieter
+  minute like `17 * * * *` fires more reliably.
 - **Re-alerted after a long idle gap** — the "seen" cache was evicted (best-effort,
   ~7 days). One-time noise; it re-seeds itself.
+
+## Recovery — "it says N tracked, 0 new, but I never got those jobs"
+This happens if runs sent against a **bad token**: the matches got marked "seen"
+without ever reaching Telegram, so later runs see nothing new. (The current code
+no longer marks un-delivered jobs as seen, so this can't recur — but you still
+have to clear the state that the old runs left behind.) To re-deliver them:
+
+1. **Sync the fork** so you're on the current code (Sync fork → Update branch).
+2. **Fix the token** (see Troubleshooting above) — verify with `getMe`.
+3. **Clear the stale "seen" state** — the Actions cache holding it:
+   - Web: repo → Actions → left sidebar **Caches** → delete `jobradar-state-…`.
+   - CLI: `gh cache delete --all -R <you>/job-radar`
+4. **Force-deliver** — Actions → job-radar → **Run workflow** → leave **seed
+   unchecked** → Run. A no-seed manual run does a real pass even from an empty
+   state, so the matches are treated as new and sent (`max_per_run` at a time,
+   the rest trickling in on later hourly runs).
+
+Confirm in the **Run one pass** log: no `401`, and `state now tracks N` with N > 0.
