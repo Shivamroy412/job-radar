@@ -253,6 +253,15 @@ keywords:
 locations: [munich, germany, berlin, europe] # a posting's location must match one
 remote_ok: true                              # ...or be remote
 
+# Or, for a "home base, but open to remote/hybrid elsewhere in the EU" search,
+# use home_locations INSTEAD of locations:
+#   home_locations: [munich, münchen]  # kept in ANY work mode (home base)
+#   remote_ok: true                    # elsewhere: keep only remote/hybrid (and
+#                                       # city-only EU postings whose mode is
+#                                       # unknown); known-onsite & non-EU dropped.
+# EU is recognised via a built-in allow-list (jobradar/filters.py); override
+# with region_locations, or force-drop a place with drop_locations.
+
 sources:
   ats:
     greenhouse: [adyen, n26, stripe, ...]

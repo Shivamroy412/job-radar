@@ -53,6 +53,8 @@ def _lever(handle: str) -> list[Job]:
                 location=cat.get("location", ""),
                 posted_at=str(j.get("createdAt", "")),
                 description=(j.get("descriptionPlain") or "")[:500],
+                # Lever exposes workplaceType = remote / hybrid / onsite.
+                work_mode=(j.get("workplaceType") or "").lower(),
                 raw=j,
             )
         )
@@ -64,6 +66,11 @@ def _ashby(handle: str) -> list[Job]:
     data = http_json(url)
     jobs = []
     for j in data.get("jobs", []):
+        # Ashby gives workplaceType (Remote/Hybrid/On-site) and an isRemote bool.
+        wt = (j.get("workplaceType") or "").lower().replace("-", "").replace(" ", "")
+        mode = {"remote": "remote", "hybrid": "hybrid", "onsite": "onsite"}.get(wt, "")
+        if not mode and j.get("isRemote") is True:
+            mode = "remote"
         jobs.append(
             Job(
                 source=f"ashby:{handle}",
@@ -74,6 +81,7 @@ def _ashby(handle: str) -> list[Job]:
                 location=j.get("location", ""),
                 posted_at=j.get("publishedAt", ""),
                 description=(j.get("descriptionPlain") or "")[:500],
+                work_mode=mode,
                 raw=j,
             )
         )

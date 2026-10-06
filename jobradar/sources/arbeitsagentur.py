@@ -45,6 +45,7 @@ def _search(was: str, wo: str, radius: int, size: int) -> list[Job]:
                 url=DETAIL_URL + urllib.parse.quote(ref) if ref else DETAIL_URL,
                 location=ort or ("Remote" if j.get("homeofficemoeglich") else ""),
                 posted_at=j.get("datumErsteVeroeffentlichung", ""),
+                work_mode="remote" if j.get("homeofficemoeglich") else "",
                 prefiltered=True,
                 raw={},
             )

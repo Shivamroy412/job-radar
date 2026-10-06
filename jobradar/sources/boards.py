@@ -47,6 +47,9 @@ def _scrape(scrape_jobs, **kwargs) -> list[Job]:
         url = _val(rec.get("job_url"))
         if not url:
             continue
+        # JobSpy emits an is_remote bool; True -> remote. (False is its default,
+        # so we treat it as "unknown", not a hard "onsite".)
+        mode = "remote" if rec.get("is_remote") is True else ""
         jobs.append(
             Job(
                 source=f"jobspy:{_val(rec.get('site')) or 'board'}",
@@ -57,6 +60,7 @@ def _scrape(scrape_jobs, **kwargs) -> list[Job]:
                 location=_val(rec.get("location")),
                 posted_at=_val(rec.get("date_posted")),
                 description=_val(rec.get("description"))[:500],
+                work_mode=mode,
                 raw={},
             )
         )

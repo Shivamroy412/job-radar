@@ -27,6 +27,11 @@ class Job:
     location: str = ""
     posted_at: str = ""              # ISO-ish string when available, else ""
     description: str = ""            # short snippet, optional
+    # Work mode from a source's STRUCTURED field, when it has one:
+    # "remote" / "hybrid" / "onsite". Empty = the source didn't say (we then
+    # fall back to reading the text). Only a structured "onsite" is trusted
+    # enough to drop a job; we never infer "onsite" from free text.
+    work_mode: str = ""
     # True when the source already did a location/radius search server-side
     # (Arbeitsagentur, etc.) — such results skip our location filter so nearby
     # towns are kept, but keyword include/exclude filters still apply.
@@ -66,3 +71,24 @@ class Job:
     def haystack(self) -> str:
         """Lowercased text that filters match against."""
         return f"{self.title} {self.location} {self.description}".lower()
+
+    def effective_work_mode(self) -> str:
+        """Best guess at work mode: 'remote' / 'hybrid' / 'onsite' / '' (unknown).
+
+        Trusts a source's structured `work_mode` first. Otherwise reads the
+        text — but only ever infers 'remote' or 'hybrid' from wording, never
+        'onsite' (too unreliable), so a missing signal stays 'unknown' rather
+        than being wrongly treated as onsite.
+        """
+        if self.work_mode:
+            return self.work_mode.lower()
+        hay = f"{self.title} {self.location} {self.description}".lower()
+        if "hybrid" in hay:
+            return "hybrid"
+        remote_terms = (
+            "remote", "anywhere", "work from home", "home office", "homeoffice",
+            "wfh", "fully remote", "remote-first", "telearbeit", "mobiles arbeiten",
+        )
+        if any(t in hay for t in remote_terms):
+            return "remote"
+        return ""
