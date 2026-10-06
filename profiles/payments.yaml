@@ -14,6 +14,11 @@ db_path: data/seen-payments.db
 max_per_run: 40        # send at most N new jobs per run; rest trickle in later
 min_score: 0           # drop weak matches below this relevance score (0 = off)
 dedupe_cross_source: true
+# Translate German job titles to English in the Telegram alert (best-effort,
+# free, keyless). Fail-open: if the translator is unreachable the title just
+# stays German. The original is kept alongside, e.g. "Accounts Payable Clerk
+# (DE: Sachbearbeiter Kreditorenbuchhaltung)". Set false to turn off.
+translate_titles: true
 
 # ---- What counts as a match --------------------------------------------------
 keywords:
