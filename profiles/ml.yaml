@@ -32,16 +32,23 @@ keywords:
     - manager
   title_only: true
 
-# Location substrings a posting must match (case-insensitive). Remote passes
-# automatically when remote_ok is true.
-locations:
+# ---- Where she'll work --------------------------------------------------------
+# Policy: Munich jobs always; anywhere else in Germany/EU only if the role is
+# remote or hybrid; onsite-elsewhere and non-EU are dropped.
+#
+# home_locations = kept regardless of work mode (home base). Setting this turns
+# on the tiered policy above. Jobs outside home are kept when remote/hybrid or
+# when the source doesn't say (we don't guess "onsite"); only a known onsite
+# flag or a clearly non-EU location drops them.
+home_locations:
   - munich
   - münchen
-  - germany
-  - deutschland
-  - berlin
-  - europe
-remote_ok: true
+remote_ok: true     # also keep plain "Remote" postings (no place named)
+# EU is recognised via a built-in allow-list (jobradar/filters.py
+# DEFAULT_REGION_LOCATIONS). Override it with `region_locations` (REPLACES the
+# built-in list), or force-drop a place inside the region with `drop_locations`:
+# drop_locations:
+#   - london
 
 # ---- Where to look -----------------------------------------------------------
 sources:
