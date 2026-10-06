@@ -6,40 +6,26 @@ from typing import Any
 
 from .models import Job
 
-# A job outside Munich is kept only when its location is recognizably
-# Germany/EU/EEA (or bare "remote" with no place named). This allow-list is
-# more reliable than a non-EU denylist: postings often give only a city with no
-# country ("San Francisco", "New York"), and there are far too many non-EU
-# cities to enumerate — so we keep what we can place in Europe and drop the
-# rest. Extend via `region_locations` in config (e.g. a German town not listed).
+# A job outside Munich is kept only when its location is recognizably in one of
+# the allowed countries (Germany, Austria, Luxembourg) or is bare "remote" with
+# no place named. An allow-list is more reliable than a non-EU denylist:
+# postings often give only a city with no country ("San Francisco", "Paris"),
+# and there are far too many places to enumerate otherwise — so we keep what we
+# can place in an allowed country and drop the rest. Widen or narrow this via
+# `region_locations` in config (it REPLACES this list).
 DEFAULT_REGION_LOCATIONS = [
-    # region words
-    "germany", "deutschland", "europe", "european union", " eu", "(eu", "eu)",
-    "eea", "emea", "schengen", "dach",
-    # EU / EEA / Switzerland country names (English + common German)
-    "austria", "österreich", "belgium", "belgique", "belgië", "bulgaria",
-    "croatia", "cyprus", "czech", "czechia", "tschechien", "denmark", "dänemark",
-    "estonia", "finland", "finnland", "france", "frankreich", "greece",
-    "griechenland", "hungary", "ungarn", "ireland", "irland", "italy", "italien",
-    "latvia", "lithuania", "luxembourg", "luxemburg", "malta", "netherlands",
-    "niederlande", "holland", "poland", "polen", "portugal", "romania",
-    "rumänien", "slovakia", "slovenia", "spain", "spanien", "sweden", "schweden",
-    "norway", "norwegen", "iceland", "liechtenstein", "switzerland", "schweiz",
-    # major German cities (non-Munich) + Munich-area towns
+    # ---- Germany ----
+    "germany", "deutschland",
     "berlin", "hamburg", "cologne", "köln", "frankfurt", "stuttgart",
     "düsseldorf", "dusseldorf", "dortmund", "essen", "leipzig", "dresden",
     "hannover", "hanover", "nürnberg", "nuremberg", "bremen", "bonn", "mannheim",
     "karlsruhe", "wiesbaden", "münster", "freiburg", "augsburg", "walldorf",
     "eschborn", "ismaning", "garching", "dachau", "unterföhring", "planegg",
-    # other major EU/EEA cities commonly seen in postings
-    "amsterdam", "rotterdam", "the hague", "den haag", "eindhoven", "paris",
-    "lyon", "madrid", "barcelona", "valencia", "lisbon", "lisboa", "porto",
-    "milan", "milano", "rome", "roma", "dublin", "vienna", "wien", "zurich",
-    "zürich", "geneva", "genève", "basel", "brussels", "bruxelles", "brussel",
-    "antwerp", "stockholm", "copenhagen", "kopenhagen", "oslo", "helsinki",
-    "warsaw", "warszawa", "krakow", "kraków", "prague", "prag", "budapest",
-    "athens", "tallinn", "riga", "vilnius", "bratislava", "ljubljana", "zagreb",
-    "sofia", "bucharest", "luxembourg city",
+    # ---- Austria ----
+    "austria", "österreich", "osterreich",
+    "vienna", "wien", "graz", "linz", "salzburg", "innsbruck", "klagenfurt",
+    # ---- Luxembourg ----
+    "luxembourg", "luxemburg",
 ]
 
 # Words that, alone, mean "remote with no place named" -> treated as EU-eligible.
